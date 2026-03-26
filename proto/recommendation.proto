@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package hipstershop;
+
+// ---- RecommendationService (served by this service) ----
+
+service RecommendationService {
+  rpc ListRecommendations(ListRecommendationsRequest) returns (ListRecommendationsResponse) {}
+}
+
+message ListRecommendationsRequest {
+  string user_id = 1;
+  repeated string product_ids = 2;
+}
+
+message ListRecommendationsResponse {
+  repeated string product_ids = 1;
+}
+
+// ---- ProductCatalogService (client stub only — called by this service) ----
+
+service ProductCatalogService {
+  rpc ListProducts(Empty) returns (ListProductsResponse) {}
+}
+
+message Empty {}
+
+message Product {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string picture = 4;
+  Money price_usd = 5;
+  repeated string categories = 6;
+}
+
+message Money {
+  string currency_code = 1;
+  int64 units = 2;
+  int32 nanos = 3;
+}
+
+message ListProductsResponse {
+  repeated Product products = 1;
+}
