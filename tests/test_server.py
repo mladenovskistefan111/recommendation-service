@@ -193,7 +193,8 @@ class TestListRecommendations_HappyPath:
 
 class TestListRecommendations_CatalogErrors:
     def _rpc_error(self, code=grpc.StatusCode.UNAVAILABLE, details="down"):
-        err = MagicMock(spec=grpc.RpcError)
+        err = MagicMock()
+        err.__class__ = grpc.RpcError
         err.code.return_value = code
         err.details.return_value = details
         return err
@@ -285,7 +286,9 @@ class TestListRecommendations_Logging:
 
     def test_logs_error_on_catalog_failure(self, mock_grpc_context, make_catalog, make_request, rec_logger):
         stub = make_catalog()
-        stub.ListProducts.side_effect = MagicMock(spec=grpc.RpcError)
+        rpc_err = MagicMock()
+        rpc_err.__class__ = grpc.RpcError
+        stub.ListProducts.side_effect = rpc_err
         servicer = _make_servicer(stub)
         servicer.ListRecommendations(make_request(), mock_grpc_context)
         error_messages = [r.getMessage() for r in rec_logger if r.levelno == logging.ERROR]
