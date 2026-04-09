@@ -10,6 +10,7 @@ import sys
 import types
 from unittest.mock import MagicMock
 
+
 # ---------------------------------------------------------------------------
 # Install stubs before importing telemetry
 # ---------------------------------------------------------------------------
@@ -27,9 +28,19 @@ def _install_otel_stubs():
     trace_mod = _mod("opentelemetry.trace")
     trace_mod.set_tracer_provider = MagicMock()
 
+    # Build a stable meter whose create_* methods each return a fixed mock
+    fake_histogram = MagicMock()
+    fake_counter = MagicMock()
+    fake_updown = MagicMock()
+
+    fake_meter = MagicMock()
+    fake_meter.create_histogram.return_value = fake_histogram
+    fake_meter.create_counter.return_value = fake_counter
+    fake_meter.create_up_down_counter.return_value = fake_updown
+
     metrics_mod = _mod("opentelemetry.metrics")
     metrics_mod.set_meter_provider = MagicMock()
-    metrics_mod.get_meter = MagicMock(return_value=MagicMock())
+    metrics_mod.get_meter = MagicMock(return_value=fake_meter)
 
     for name in [
         "opentelemetry.sdk.trace",
@@ -48,10 +59,14 @@ def _install_otel_stubs():
 
     sys.modules["opentelemetry.sdk.trace"].TracerProvider = MagicMock()
     sys.modules["opentelemetry.sdk.trace.export"].BatchSpanProcessor = MagicMock()
-    sys.modules["opentelemetry.exporter.otlp.proto.http.trace_exporter"].OTLPSpanExporter = MagicMock()
+    sys.modules[
+        "opentelemetry.exporter.otlp.proto.http.trace_exporter"
+    ].OTLPSpanExporter = MagicMock()
     sys.modules["opentelemetry.sdk.metrics"].MeterProvider = MagicMock()
     sys.modules["opentelemetry.sdk.metrics.view"].View = MagicMock()
-    sys.modules["opentelemetry.sdk.metrics._internal.aggregation"].ExplicitBucketHistogramAggregation = MagicMock()
+    sys.modules[
+        "opentelemetry.sdk.metrics._internal.aggregation"
+    ].ExplicitBucketHistogramAggregation = MagicMock()
     sys.modules["opentelemetry.exporter.prometheus"].PrometheusMetricReader = MagicMock()
 
     resource_mod = sys.modules["opentelemetry.sdk.resources"]
@@ -59,7 +74,6 @@ def _install_otel_stubs():
     resource_mod.SERVICE_NAME = "service.name"
     resource_mod.SERVICE_VERSION = "service.version"
 
-    # recommendation-service uses both Server and Client instrumentors
     grpc_instr = sys.modules["opentelemetry.instrumentation.grpc"]
     grpc_instr.GrpcInstrumentorServer = MagicMock()
     grpc_instr.GrpcInstrumentorClient = MagicMock()
