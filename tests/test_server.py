@@ -191,13 +191,23 @@ class TestListRecommendations_HappyPath:
 # ---------------------------------------------------------------------------
 
 
+class _FakeRpcError(grpc.RpcError):
+    """A real exception subclass so it can be raised by side_effect."""
+
+    def __init__(self, code, details):
+        self._code = code
+        self._details = details
+
+    def code(self):
+        return self._code
+
+    def details(self):
+        return self._details
+
+
 class TestListRecommendations_CatalogErrors:
     def _rpc_error(self, code=grpc.StatusCode.UNAVAILABLE, details="down"):
-        err = MagicMock()
-        err.__class__ = grpc.RpcError
-        err.code.return_value = code
-        err.details.return_value = details
-        return err
+        return _FakeRpcError(code, details)
 
     def test_catalog_rpc_error_sets_internal(self, mock_grpc_context, make_catalog, make_request):
         stub = make_catalog()
@@ -286,9 +296,7 @@ class TestListRecommendations_Logging:
 
     def test_logs_error_on_catalog_failure(self, mock_grpc_context, make_catalog, make_request, rec_logger):
         stub = make_catalog()
-        rpc_err = MagicMock()
-        rpc_err.__class__ = grpc.RpcError
-        stub.ListProducts.side_effect = rpc_err
+        stub.ListProducts.side_effect = _FakeRpcError(grpc.StatusCode.UNAVAILABLE, "down")
         servicer = _make_servicer(stub)
         servicer.ListRecommendations(make_request(), mock_grpc_context)
         error_messages = [r.getMessage() for r in rec_logger if r.levelno == logging.ERROR]
