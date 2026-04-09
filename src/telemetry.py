@@ -68,7 +68,7 @@ meter_provider = MeterProvider(
 metrics.set_meter_provider(meter_provider)
 
 # Start Prometheus HTTP server in a background thread
-start_http_server(port=_METRICS_PORT, addr="0.0.0.0") # nosec B104
+start_http_server(port=_METRICS_PORT, addr="0.0.0.0")  # nosec B104
 print(f"Prometheus metrics server listening on :{_METRICS_PORT}/metrics")
 
 # ---------------------------------------------------------------------------
