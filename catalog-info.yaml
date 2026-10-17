@@ -1,0 +1,45 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: recommendation-service
+  title: recommendation-service
+  description: "A gRPC service that returns product recommendations for the platform-demo e-commerce platform."
+  annotations:
+    github.com/project-slug: platform-boutique/app-recommendation-service
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-id: recommendation-service
+    backstage.io/kubernetes-namespace: platform-demo
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/name=recommendation-service
+    argocd/app-name: dev-recommendation-service
+    grafana/dashboard-selector: "tags @> 'recommendation'"
+    grafana/overview-dashboard: "https://grafana.platform-demo.test/d/recommendation-service-overview"
+  tags: [python, grpc]
+  links:
+    - { url: "https://github.com/platform-boutique/app-recommendation-service", title: Repository, icon: github }
+    - { url: "https://argocd.platform-demo.test/applications/argocd/dev-recommendation-service", title: Argo CD, icon: dashboard }
+    - { url: "https://grafana.platform-demo.test/d/recommendation-service-overview", title: Grafana dashboard, icon: dashboard }
+spec:
+  type: service
+  lifecycle: experimental
+  owner: group:default/maintainers
+  system: shop
+  providesApis: [recommendation-service-api]
+  consumesApis: [product-catalog-service-api]
+  dependsOn:
+    - component:default/product-catalog-service
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: recommendation-service-api
+  description: gRPC interface of recommendation-service (Protocol Buffers).
+  tags: [grpc, protobuf]
+  links:
+    - { url: "https://github.com/platform-boutique/app-recommendation-service/blob/main/proto/recommendation.proto", title: "recommendation.proto on GitHub", icon: code }
+spec:
+  type: grpc
+  lifecycle: experimental
+  owner: group:default/maintainers
+  system: shop
+  definition:
+    $text: ./proto/recommendation.proto
