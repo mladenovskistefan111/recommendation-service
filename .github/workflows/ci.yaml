@@ -1,0 +1,34 @@
+name: CI
+
+# Pull-request gate. Nothing runs on a plain push; images are published by release.yaml.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    permissions:
+      contents: read
+      pull-requests: read # gitleaks lists the PR's commits through the API
+    uses: mladenovskistefan111/platform-demo-workflows/.github/workflows/python-ci.yaml@87fca0e809f6ba84b782bc2fb2cc1d740b3c877f # v1.1.0
+
+  image:
+    needs: [python]
+    permissions:
+      contents: read
+      packages: write
+    uses: mladenovskistefan111/platform-demo-workflows/.github/workflows/docker-build.yaml@87fca0e809f6ba84b782bc2fb2cc1d740b3c877f # v1.1.0
+    with:
+      trivyignores: .trivyignore
+
+  workflows:
+    permissions:
+      contents: read
+    uses: mladenovskistefan111/platform-demo-workflows/.github/workflows/workflow-lint.yaml@87fca0e809f6ba84b782bc2fb2cc1d740b3c877f # v1.1.0
