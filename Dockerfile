@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM python:3.12-alpine AS builder
+FROM python:3.14-alpine AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -24,7 +24,7 @@ RUN mkdir -p generated \
     && sed -i 's/^import recommendation_pb2 as recommendation__pb2/from . import recommendation_pb2 as recommendation__pb2/' generated/recommendation_pb2_grpc.py
 
 # ---- Runtime stage ----
-FROM python:3.12-alpine AS runtime
+FROM python:3.14-alpine AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
