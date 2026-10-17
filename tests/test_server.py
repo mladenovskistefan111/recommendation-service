@@ -7,7 +7,7 @@ Strategy
   with lightweight fakes installed into sys.modules before server.py imports.
 - The ProductCatalogServiceStub is injected via __init__ — no patching needed,
   just pass a mock stub directly.
-- random.sample is patched where determinism matters.
+- random.SystemRandom().sample is patched where determinism matters.
 """
 
 import logging
@@ -177,10 +177,12 @@ class TestListRecommendations_HappyPath:
         assert len(result.product_ids) == len(set(result.product_ids))
 
     def test_randomness_respected(self, mock_grpc_context, make_catalog, make_request):
-        """Patch random.sample to verify it is called with the candidate set."""
+        """Patch SystemRandom().sample to verify it is called with the candidate set."""
         stub = make_catalog(product_ids=["P1", "P2", "P3"])
         servicer = _make_servicer(stub)
-        with patch("server.random.sample", return_value=["P3"]) as mock_sample:
+        with patch("server.random.SystemRandom") as mock_rng:
+            mock_sample = mock_rng.return_value.sample
+            mock_sample.return_value = ["P3"]
             result = servicer.ListRecommendations(make_request(product_ids=[]), mock_grpc_context)
         mock_sample.assert_called_once()
         assert result.product_ids == ["P3"]
