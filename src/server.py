@@ -61,7 +61,7 @@ class RecommendationServiceServicer(recommendation_pb2_grpc.RecommendationServic
             # Filter out products the user already has, then sample randomly
             candidates = list(set(all_ids) - set(request.product_ids))
             num_return = min(self.MAX_RESPONSES, len(candidates))
-            recommended = random.sample(candidates, num_return)
+            recommended = random.SystemRandom().sample(candidates, num_return)
 
             logger.info(f"ListRecommendations user_id={request.user_id} returning product_ids={recommended}")
 
