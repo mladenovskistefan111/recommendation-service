@@ -12,6 +12,7 @@ metadata:
     backstage.io/kubernetes-label-selector: app.kubernetes.io/name=recommendation-service
     argocd/app-name: dev-recommendation-service
     grafana/dashboard-selector: "tags @> 'recommendation'"
+    grafana/alert-label-selector: "service=recommendation-service"
     grafana/overview-dashboard: "https://grafana.platform-demo.test/d/recommendation-service-overview"
   tags: [python, grpc]
   links:
