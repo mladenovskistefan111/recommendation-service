@@ -1,6 +1,7 @@
 name: CI
 
-# Pull-request gate. Nothing runs on a plain push; images are published by release.yaml.
+# Pull-request gate: guards (change detection, secrets, workflows) start at t=0; when code changed, lint, build, tests, SCA, SAST
+# and an image build + CVE scan run in parallel with them; nothing is pushed. The only required status check is `ci / gate`.
 on:
   pull_request:
     branches: [main]
@@ -13,22 +14,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  python:
+  ci:
     permissions:
       contents: read
-      pull-requests: read # gitleaks lists the PR's commits through the API
-    uses: platform-boutique/platform-demo-workflows/.github/workflows/python-ci.yaml@28d80c1d4abd81c1529bf593a874640132692e8a # v2.0.2
-
-  image:
-    needs: [python]
-    permissions:
-      contents: read
-      packages: write
-    uses: platform-boutique/platform-demo-workflows/.github/workflows/docker-build.yaml@28d80c1d4abd81c1529bf593a874640132692e8a # v2.0.2
+      packages: read # reads the registry build cache
+    uses: platform-boutique/platform-demo-workflows/.github/workflows/service-ci-python.yaml@ee7562da9860ad2c824ce50e6d56c1f62f1d3515 # v3.3.0
     with:
       trivyignores: .trivyignore
-
-  workflows:
-    permissions:
-      contents: read
-    uses: platform-boutique/platform-demo-workflows/.github/workflows/workflow-lint.yaml@28d80c1d4abd81c1529bf593a874640132692e8a # v2.0.2
