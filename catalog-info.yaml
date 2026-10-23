@@ -14,11 +14,9 @@ metadata:
     argocd/app-name: dev-recommendation-service
     grafana/dashboard-selector: "tags @> 'recommendation'"
     grafana/alert-label-selector: "service=recommendation-service"
-    grafana/overview-dashboard: "https://grafana.platform-demo.test/d/recommendation-service-overview"
   tags: [python, grpc]
   links:
-    - { url: "https://argocd.platform-demo.test/applications/argocd/dev-recommendation-service", title: Argo CD, icon: dashboard }
-    - { url: "https://grafana.platform-demo.test/d/recommendation-service-overview", title: Grafana dashboard, icon: dashboard }
+    - { url: "https://argocd.platform-demo.click/applications/argocd/dev-recommendation-service", title: Argo CD, icon: dashboard }
 spec:
   type: service
   lifecycle: experimental
